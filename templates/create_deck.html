@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Deck</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Create New Deck</h1>
+        
+        <form method="POST" class="form">
+            <input type="text" name="deck_name" placeholder="Enter deck name (e.g., Spanish Vocab)" required>
+            <button type="submit" class="btn btn-primary">Create Deck</button>
+            <a href="/decks" class="btn">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

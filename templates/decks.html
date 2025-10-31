@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Decks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 My Decks</h1>
+        
+        {% if decks %}
+            <div class="deck-list">
+                {% for deck in decks %}
+                <div class="deck-card">
+                    <h3>{{ deck.name }}</h3>
+                    <p>{{ deck.cards|length }} cards</p>
+                    <a href="/deck/{{ deck.id }}" class="btn btn-primary">Open</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No decks yet! Create your first one.</p>
+        {% endif %}
+        
+        <div class="buttons">
+            <a href="/create-deck" class="btn btn-secondary">Create New Deck</a>
+            <a href="/" class="btn">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study - {{ deck.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Studying: {{ deck.name }}</h1>
+        
+        {% if deck.cards %}
+            <p>Click the card to flip it!</p>
+            
+            <div class="study-card" id="flashcard" onclick="flipCard()">
+                <h2>Question</h2>
+                <p id="card-content"></p>
+            </div>
+            
+            <p id="card-counter"></p>
+            
+            <div class="study-controls">
+                <button class="btn btn-secondary" onclick="previousCard()">⬅️ Previous</button>
+                <button class="btn btn-primary" onclick="nextCard()">Next ➡️</button>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="shuffleCards()">🔀 Shuffle</button>
+                <a href="/deck/{{ deck.id }}" class="btn">Finish Studying</a>
+            </div>
+        {% else %}
+            <p>No cards to study!</p>
+            <a href="/deck/{{ deck.id }}/add-card" class="btn btn-primary">Add Cards</a>
+        {% endif %}
+    </div>
+    
+    <script>
+        let allCards = [
+            {% for card in deck.cards %}
+            {
+                question: {{ card.question | tojson }},
+                answer: {{ card.answer | tojson }},
+                mastered: {{ card.mastered | tojson }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        // Filter for unmastered only if requested
+        const onlyUnmastered = {{ only_unmastered | tojson }};
+        let cards = onlyUnmastered === 'true' ? allCards.filter(card => !card.mastered) : allCards;
+        
+        if (cards.length === 0) {
+            document.querySelector('.container').innerHTML = `
+                <h1>🎉 Congratulations!</h1>
+                <p>You've mastered all cards in this deck!</p>
+                <div class="buttons">
+                    <a href="/deck/{{ deck.id }}" class="btn btn-primary">Back to Deck</a>
+                </div>
+            `;
+        }
+        
+        // Shuffle on load if requested
+        const shouldShuffle = {{ shuffle | tojson }};
+        if (shouldShuffle === 'true' && cards.length > 0) {
+            shuffleArray(cards);
+        }
+        
+        let currentIndex = 0;
+        let showingQuestion = true;
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        function shuffleCards() {
+            shuffleArray(cards);
+            currentIndex = 0;
+            showingQuestion = true;
+            displayCard();
+        }
+        
+        function displayCard() {
+            if (cards.length === 0) return;
+            
+            const card = cards[currentIndex];
+            const contentEl = document.getElementById('card-content');
+            const counterEl = document.getElementById('card-counter');
+            const flashcardEl = document.getElementById('flashcard');
+            
+            if (showingQuestion) {
+                contentEl.textContent = card.question;
+                flashcardEl.querySelector('h2').textContent = 'Question';
+            } else {
+                contentEl.textContent = card.answer;
+                flashcardEl.querySelector('h2').textContent = 'Answer';
+            }
+            
+            const masteredText = card.mastered ? ' ⭐' : '';
+            counterEl.textContent = `Card ${currentIndex + 1} of ${cards.length}${masteredText}`;
+        }
+        
+        function flipCard() {
+            showingQuestion = !showingQuestion;
+            displayCard();
+        }
+        
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                showingQuestion = true;
+                displayCard();
+            }
+        }
+        
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showingQuestion = true;
+                displayCard();
+            }
+        }
+        
+        // Display first card on load
+        if (cards.length > 0) {
+            displayCard();
+        }
+    </script>
+</body>
+</html>

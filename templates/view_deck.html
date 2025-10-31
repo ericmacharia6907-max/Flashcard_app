@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📖 {{ deck.name }}</h1>
+        <p>{{ deck.cards|length }} cards total | ⭐ {{ mastered_count }} mastered</p>
+        
+        {% if deck.cards %}
+            <div class="card-list">
+                {% for card in deck.cards %}
+                <div class="flashcard {% if card.mastered %}mastered-card{% endif %}">
+                    {% if card.mastered %}
+                        <span class="mastered-badge">⭐ Mastered</span>
+                    {% endif %}
+                    <strong>Q:</strong> {{ card.question }}
+                    <br><br>
+                    <strong>A:</strong> {{ card.answer }}
+                    <div class="flashcard-actions">
+                        <form method="POST" action="/card/{{ card.id }}/toggle-mastered" style="display:inline;">
+                            <button type="submit" class="btn {% if card.mastered %}btn-secondary{% else %}btn-primary{% endif %}">
+                                {% if card.mastered %}
+                                    Unmark
+                                {% else %}
+                                    ⭐ Mark as Mastered
+                                {% endif %}
+                            </button>
+                        </form>
+                        <a href="/card/{{ card.id }}/edit" class="btn btn-secondary">Edit</a>
+                        <form method="POST" action="/card/{{ card.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this card?');">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="buttons">
+                <a href="/deck/{{ deck.id }}/study" class="btn btn-primary">📚 Study All Cards</a>
+                <a href="/deck/{{ deck.id }}/study?shuffle=true" class="btn btn-secondary">🔀 Study Shuffled</a>
+                <a href="/deck/{{ deck.id }}/study?unmastered=true" class="btn btn-secondary">📖 Study Unmastered Only</a>
+            </div>
+        {% else %}
+            <p>No cards yet! Add your first card.</p>
+        {% endif %}
+        
+        <div class="buttons">
+            <a href="/deck/{{ deck.id }}/add-card" class="btn btn-secondary">➕ Add Card</a>
+            <form method="POST" action="/deck/{{ deck.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete entire deck and all cards?');">
+                <button type="submit" class="btn btn-danger">🗑️ Delete Deck</button>
+            </form>
+            <a href="/decks" class="btn">Back to Decks</a>
+        </div>
+    </div>
+</body>
+</html>

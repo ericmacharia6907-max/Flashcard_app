@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 My Flashcards App</h1>
+        <p>Learn anything, one card at a time!</p>
+        
+        <div class="buttons">
+            <a href="/decks" class="btn btn-primary">View My Decks</a>
+            <a href="/create-deck" class="btn btn-secondary">Create New Deck</a>
+        </div>
+    </div>
+</body>
+</html>
