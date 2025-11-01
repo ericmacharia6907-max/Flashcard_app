@@ -10,7 +10,19 @@
     <div class="container">
         <h1>📚 My Decks</h1>
         
+        <!-- Search Bar -->
+        <form method="GET" action="/decks" class="search-form">
+            <input type="text" name="search" placeholder="🔍 Search decks..." value="{{ search_query }}" class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search_query %}
+                <a href="/decks" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+        
         {% if decks %}
+            {% if search_query %}
+                <p>Found {{ decks|length }} deck(s) matching "{{ search_query }}"</p>
+            {% endif %}
             <div class="deck-list">
                 {% for deck in decks %}
                 <div class="deck-card">
@@ -21,11 +33,16 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p>No decks yet! Create your first one.</p>
+            {% if search_query %}
+                <p>No decks found matching "{{ search_query }}"</p>
+            {% else %}
+                <p>No decks yet! Create your first one.</p>
+            {% endif %}
         {% endif %}
         
         <div class="buttons">
             <a href="/create-deck" class="btn btn-secondary">Create New Deck</a>
+            <a href="/import-deck" class="btn btn-primary">📥 Import Deck</a>
             <a href="/" class="btn">Back to Home</a>
         </div>
     </div>

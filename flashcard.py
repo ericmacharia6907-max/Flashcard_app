@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 import random
+import json
+import io
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flashcards.db'
@@ -31,8 +33,12 @@ def home():
 
 @app.route('/decks')
 def decks():
-    all_decks = Deck.query.all()
-    return render_template('decks.html', decks=all_decks)
+    search_query = request.args.get('search', '')
+    if search_query:
+        all_decks = Deck.query.filter(Deck.name.ilike(f'%{search_query}%')).all()
+    else:
+        all_decks = Deck.query.all()
+    return render_template('decks.html', decks=all_decks, search_query=search_query)
 
 @app.route('/create-deck', methods=['GET', 'POST'])
 def create_deck():
@@ -85,6 +91,73 @@ def study(deck_id):
     shuffle = request.args.get('shuffle', 'false')
     only_unmastered = request.args.get('unmastered', 'false')
     return render_template('study.html', deck=deck, shuffle=shuffle, only_unmastered=only_unmastered)
+
+@app.route('/deck/<int:deck_id>/export')
+def export_deck(deck_id):
+    deck = Deck.query.get_or_404(deck_id)
+    
+    # Create export data
+    export_data = {
+        'deck_name': deck.name,
+        'cards': [
+            {
+                'question': card.question,
+                'answer': card.answer,
+                'mastered': card.mastered
+            }
+            for card in deck.cards
+        ]
+    }
+    
+    # Convert to JSON
+    json_data = json.dumps(export_data, indent=2)
+    
+    # Create file in memory
+    file = io.BytesIO()
+    file.write(json_data.encode('utf-8'))
+    file.seek(0)
+    
+    # Send file as download
+    filename = f"{deck.name.replace(' ', '_')}.json"
+    return send_file(file, as_attachment=True, download_name=filename, mimetype='application/json')
+
+@app.route('/import-deck', methods=['GET', 'POST'])
+def import_deck():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return redirect(url_for('import_deck'))
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return redirect(url_for('import_deck'))
+        
+        if file and file.filename.endswith('.json'):
+            try:
+                # Read and parse JSON
+                data = json.load(file)
+                
+                # Create new deck
+                new_deck = Deck(name=data['deck_name'])
+                db.session.add(new_deck)
+                db.session.flush()  # Get the deck ID
+                
+                # Add cards
+                for card_data in data['cards']:
+                    new_card = Card(
+                        question=card_data['question'],
+                        answer=card_data['answer'],
+                        mastered=card_data.get('mastered', False),
+                        deck_id=new_deck.id
+                    )
+                    db.session.add(new_card)
+                
+                db.session.commit()
+                return redirect(url_for('decks'))
+            except Exception as e:
+                return f"Error importing deck: {str(e)}"
+        
+    return render_template('import_deck.html')
 
 @app.route('/deck/<int:deck_id>/delete', methods=['POST'])
 def delete_deck(deck_id):

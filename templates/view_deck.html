@@ -50,6 +50,7 @@
         
         <div class="buttons">
             <a href="/deck/{{ deck.id }}/add-card" class="btn btn-secondary">➕ Add Card</a>
+            <a href="/deck/{{ deck.id }}/export" class="btn btn-primary">📤 Export Deck</a>
             <form method="POST" action="/deck/{{ deck.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete entire deck and all cards?');">
                 <button type="submit" class="btn btn-danger">🗑️ Delete Deck</button>
             </form>

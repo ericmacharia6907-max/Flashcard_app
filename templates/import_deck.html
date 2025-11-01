@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Deck</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📥 Import Deck</h1>
+        <p>Upload a .json file to import a deck</p>
+        
+        <form method="POST" enctype="multipart/form-data" class="form">
+            <input type="file" name="file" accept=".json" required class="file-input">
+            <button type="submit" class="btn btn-primary">Import Deck</button>
+            <a href="/decks" class="btn">Cancel</a>
+        </form>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: left;">
+            <h3>📝 How to use:</h3>
+            <ol style="color: #666; line-height: 1.8;">
+                <li>Export a deck from another account</li>
+                <li>Click "Choose File" and select the .json file</li>
+                <li>Click "Import Deck"</li>
+                <li>Your deck will appear in "My Decks"!</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
